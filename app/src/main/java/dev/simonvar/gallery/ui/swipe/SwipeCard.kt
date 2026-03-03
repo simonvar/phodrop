@@ -5,6 +5,7 @@ import androidx.compose.animation.core.VectorConverter
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -65,6 +66,7 @@ fun SwipeCard(
     onSwipeRight: () -> Unit,
     isMuted: Boolean,
     onToggleMute: () -> Unit,
+    onTap: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val scope = rememberCoroutineScope()
@@ -80,6 +82,9 @@ fun SwipeCard(
             .offset { IntOffset(offset.value.x.roundToInt(), offset.value.y.roundToInt()) }
             .rotate(rotation)
             .clip(RoundedCornerShape(16.dp))
+            .pointerInput(item.id) {
+                detectTapGestures(onTap = { onTap() })
+            }
             .pointerInput(item.id) {
                 detectDragGestures(
                     onDrag = { change, dragAmount ->

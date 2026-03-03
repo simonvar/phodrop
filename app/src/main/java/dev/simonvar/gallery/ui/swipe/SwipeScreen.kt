@@ -31,6 +31,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 @Composable
 fun SwipeScreen(
     onNavigateToTrash: () -> Unit,
+    onNavigateToFullscreen: (Long) -> Unit,
     viewModel: SwipeViewModel = viewModel(),
 ) {
     Scaffold(
@@ -86,6 +87,7 @@ fun SwipeScreen(
                                 onSwipeRight = viewModel::onSwipeRight,
                                 isMuted = viewModel.isMuted,
                                 onToggleMute = viewModel::toggleMute,
+                                onTap = { onNavigateToFullscreen(item.id) },
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .weight(1f)

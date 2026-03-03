@@ -107,6 +107,62 @@ class MediaRepository(private val context: Context) {
         return items
     }
 
+    fun findItemById(id: Long): MediaItem? {
+        // Try images first
+        val imageUri = ContentUris.withAppendedId(
+            MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id
+        )
+        val imageProjection = arrayOf(
+            MediaStore.Images.Media._ID,
+            MediaStore.Images.Media.DISPLAY_NAME,
+            MediaStore.Images.Media.DATE_ADDED,
+            MediaStore.Images.Media.SIZE,
+        )
+        context.contentResolver.query(
+            imageUri, imageProjection, null, null, null
+        )?.use { cursor ->
+            if (cursor.moveToFirst()) {
+                return MediaItem(
+                    id = id,
+                    uri = imageUri,
+                    mediaType = MediaType.IMAGE,
+                    displayName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME)),
+                    dateAdded = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_ADDED)),
+                    size = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.SIZE)),
+                )
+            }
+        }
+
+        // Try videos
+        val videoUri = ContentUris.withAppendedId(
+            MediaStore.Video.Media.EXTERNAL_CONTENT_URI, id
+        )
+        val videoProjection = arrayOf(
+            MediaStore.Video.Media._ID,
+            MediaStore.Video.Media.DISPLAY_NAME,
+            MediaStore.Video.Media.DATE_ADDED,
+            MediaStore.Video.Media.DURATION,
+            MediaStore.Video.Media.SIZE,
+        )
+        context.contentResolver.query(
+            videoUri, videoProjection, null, null, null
+        )?.use { cursor ->
+            if (cursor.moveToFirst()) {
+                return MediaItem(
+                    id = id,
+                    uri = videoUri,
+                    mediaType = MediaType.VIDEO,
+                    displayName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DISPLAY_NAME)),
+                    dateAdded = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATE_ADDED)),
+                    duration = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DURATION)),
+                    size = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.SIZE)),
+                )
+            }
+        }
+
+        return null
+    }
+
     fun createDeleteRequest(
         activity: Activity,
         uris: List<Uri>,
