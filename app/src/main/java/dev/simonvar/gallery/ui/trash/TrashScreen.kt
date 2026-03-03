@@ -24,6 +24,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -55,7 +58,22 @@ fun TrashScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Trash (${viewModel.items.size})") },
+                title = {
+                    val count = viewModel.items.size
+                    val totalBytes = viewModel.items.sumOf { it.size }
+                    val totalMb = totalBytes / 1_048_576.0
+                    val sizeText = if (totalMb >= 1024) {
+                        String.format(java.util.Locale.US, "%.1f GB", totalMb / 1024)
+                    } else {
+                        String.format(java.util.Locale.US, "%.1f MB", totalMb)
+                    }
+                    Text(buildAnnotatedString {
+                        append("Trash ($count) — ")
+                        withStyle(SpanStyle(color = if (totalMb > 50) Color.Red else Color.Unspecified)) {
+                            append(sizeText)
+                        }
+                    })
+                },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(

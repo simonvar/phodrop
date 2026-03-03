@@ -6,8 +6,11 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -20,6 +23,8 @@ import androidx.compose.material.icons.automirrored.filled.VolumeOff
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -43,6 +48,9 @@ import dev.simonvar.gallery.data.MediaItem
 import dev.simonvar.gallery.data.MediaType
 import dev.simonvar.gallery.ui.components.VideoPlayer
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
@@ -154,6 +162,34 @@ fun SwipeCard(
                     .align(Alignment.TopEnd)
                     .padding(24.dp)
                     .graphicsLayer { scaleX = 2f; scaleY = 2f },
+            )
+        }
+
+        // Date and size overlay
+        val dateFormat = remember { SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()) }
+        val formattedDate = remember(item.dateAdded) {
+            dateFormat.format(Date(item.dateAdded * 1000))
+        }
+        val sizeMb = item.size / 1_048_576.0
+        val formattedSize = remember(item.size) { String.format(Locale.US, "%.1f MB", sizeMb) }
+
+        Row(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+                .background(Color.Black.copy(alpha = 0.6f))
+                .padding(horizontal = 12.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Text(
+                text = formattedDate,
+                style = MaterialTheme.typography.bodySmall,
+                color = Color.White,
+            )
+            Text(
+                text = formattedSize,
+                style = MaterialTheme.typography.bodySmall,
+                color = if (sizeMb > 50) Color.Red else Color.White,
             )
         }
 
