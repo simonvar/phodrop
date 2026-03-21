@@ -1,7 +1,10 @@
-package dev.simonvar.gallery.presentation.fullscreen
+package dev.simonvar.gallery.presentation.media
 
+import android.net.Uri
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
+import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -10,23 +13,25 @@ import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.simonvar.gallery.data.MediaType
 import me.saket.telephoto.zoomable.coil3.ZoomableAsyncImage
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-fun FullscreenScreen(
+fun MediaNode(
+    itemId: Long,
+    uri: Uri,
+    mediaType: MediaType,
+    displayName: String,
     onBack: () -> Unit,
-    viewModel: FullscreenViewModel = viewModel(),
+    sharedTransitionScope: SharedTransitionScope,
 ) {
     Box(
         modifier = Modifier
@@ -35,27 +40,23 @@ fun FullscreenScreen(
             .systemBarsPadding(),
         contentAlignment = Alignment.Center,
     ) {
-        when {
-            viewModel.isLoading -> {
-                CircularProgressIndicator(color = Color.White)
-            }
-
-            viewModel.item != null -> {
-                val item = viewModel.item!!
-                if (item.mediaType == MediaType.VIDEO) {
-                    FullscreenVideoPlayer(
-                        uri = item.uri,
-                        modifier = Modifier.fillMaxSize(),
-                    )
-                } else {
-                    ZoomableAsyncImage(
-                        model = item.uri,
-                        contentDescription = item.displayName,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .border(2.dp, MaterialTheme.colorScheme.outline),
-                    )
-                }
+        if (mediaType == MediaType.VIDEO) {
+            FullscreenVideoPlayer(
+                uri = uri,
+                modifier = Modifier.fillMaxSize(),
+            )
+        } else {
+            with(sharedTransitionScope) {
+                ZoomableAsyncImage(
+                    model = uri,
+                    contentDescription = displayName,
+                    modifier = Modifier
+                        .sharedElement(
+                            rememberSharedContentState(key = "media_image_${itemId}"),
+                            animatedVisibilityScope = LocalNavAnimatedContentScope.current,
+                        )
+                        .fillMaxSize(),
+                )
             }
         }
 

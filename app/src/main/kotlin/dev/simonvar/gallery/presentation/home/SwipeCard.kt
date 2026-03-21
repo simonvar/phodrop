@@ -1,5 +1,8 @@
 package dev.simonvar.gallery.presentation.home
 
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
+import androidx.navigation3.ui.LocalNavAnimatedContentScope
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.VectorConverter
 import androidx.compose.animation.core.spring
@@ -62,6 +65,7 @@ private const val FLY_OFF_DURATION_MS = 300
 
 enum class SwipeDirection { LEFT, RIGHT }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun SwipeCard(
     item: MediaItem,
@@ -70,6 +74,7 @@ fun SwipeCard(
     isMuted: Boolean,
     onToggleMute: () -> Unit,
     onTap: () -> Unit,
+    sharedTransitionScope: SharedTransitionScope,
     programmaticSwipe: SwipeDirection? = null,
     onProgrammaticSwipeConsumed: () -> Unit = {},
     modifier: Modifier = Modifier,
@@ -152,12 +157,19 @@ fun SwipeCard(
                 modifier = Modifier.fillMaxSize(),
             )
         } else {
-            AsyncImage(
-                model = item.uri,
-                contentDescription = item.displayName,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize(),
-            )
+            with(sharedTransitionScope) {
+                AsyncImage(
+                    model = item.uri,
+                    contentDescription = item.displayName,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .sharedElement(
+                            rememberSharedContentState(key = "media_image_${item.id}"),
+                            animatedVisibilityScope = LocalNavAnimatedContentScope.current,
+                        )
+                        .fillMaxSize(),
+                )
+            }
         }
 
         // Swipe overlays

@@ -12,7 +12,7 @@ navigationCompose = "2.9.7"
 coil = "3.4.0"
 media3 = "1.9.3"
 telephoto = "0.18.0"
-nav3Core = "1.0.1"
+nav3Core = "1.1.0-beta01"
 kotlinSerialization = "2.3.20"
 kotlinxSerializationCore = "1.9.0"
 

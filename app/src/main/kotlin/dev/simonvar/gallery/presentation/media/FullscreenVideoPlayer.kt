@@ -1,4 +1,4 @@
-package dev.simonvar.gallery.presentation.fullscreen
+package dev.simonvar.gallery.presentation.media
 
 import android.net.Uri
 import androidx.annotation.OptIn
