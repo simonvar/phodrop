@@ -1,4 +1,4 @@
-package dev.simonvar.gallery.ui.swipe
+package dev.simonvar.gallery.presentation.home
 
 import dev.simonvar.gallery.arch.ActionScope
 import dev.simonvar.gallery.arch.UiAction

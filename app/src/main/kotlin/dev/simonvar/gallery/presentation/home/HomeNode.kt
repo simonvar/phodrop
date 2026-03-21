@@ -1,4 +1,4 @@
-package dev.simonvar.gallery.ui.swipe
+package dev.simonvar.gallery.presentation.home
 
 import android.app.Application
 import androidx.compose.foundation.layout.Arrangement
@@ -36,9 +36,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SwipeScreen(
+fun HomeNode(
     onNavigateToTrash: () -> Unit,
     onNavigateToFullscreen: (Long) -> Unit,
+    modifier: Modifier = Modifier,
     viewModel: SwipeViewModel = viewModel(
         factory = SwipeViewModel.factory(LocalContext.current.applicationContext as Application),
     ),
@@ -46,6 +47,7 @@ fun SwipeScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     Scaffold(
+        modifier = modifier,
         topBar = {
             TopAppBar(
                 title = { Text("Gallery Cleanup") },

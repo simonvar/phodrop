@@ -1,13 +1,12 @@
-package dev.simonvar.gallery.ui.trash
+package dev.simonvar.gallery.presentation.trash
 
 import android.app.Activity
+import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -32,20 +31,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
 import dev.simonvar.gallery.data.MediaItem
 import dev.simonvar.gallery.data.MediaType
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TrashScreen(
+fun TrashNode(
     onBack: () -> Unit,
+    modifier: Modifier = Modifier,
     viewModel: TrashViewModel = viewModel(),
 ) {
-    val activity = LocalContext.current as Activity
+    val activity = LocalActivity.current!!
 
     val deleteLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartIntentSenderForResult()
@@ -56,6 +56,7 @@ fun TrashScreen(
     }
 
     Scaffold(
+        modifier = modifier,
         topBar = {
             TopAppBar(
                 title = {
@@ -63,9 +64,9 @@ fun TrashScreen(
                     val totalBytes = viewModel.items.sumOf { it.size }
                     val totalMb = totalBytes / 1_048_576.0
                     val sizeText = if (totalMb >= 1024) {
-                        String.format(java.util.Locale.US, "%.1f GB", totalMb / 1024)
+                        String.format(Locale.US, "%.1f GB", totalMb / 1024)
                     } else {
-                        String.format(java.util.Locale.US, "%.1f MB", totalMb)
+                        String.format(Locale.US, "%.1f MB", totalMb)
                     }
                     Text(buildAnnotatedString {
                         append("Trash ($count) — ")

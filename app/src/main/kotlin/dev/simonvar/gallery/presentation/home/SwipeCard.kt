@@ -1,4 +1,4 @@
-package dev.simonvar.gallery.ui.swipe
+package dev.simonvar.gallery.presentation.home
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.VectorConverter
@@ -48,7 +48,7 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import dev.simonvar.gallery.data.MediaItem
 import dev.simonvar.gallery.data.MediaType
-import dev.simonvar.gallery.ui.components.VideoPlayer
+import dev.simonvar.gallery.ui.block.VideoPlayer
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date

@@ -1,4 +1,4 @@
-package dev.simonvar.gallery.ui.components
+package dev.simonvar.gallery.ui.block
 
 import android.net.Uri
 import androidx.compose.runtime.Composable

@@ -1,4 +1,4 @@
-package dev.simonvar.gallery.ui.fullscreen
+package dev.simonvar.gallery.presentation.fullscreen
 
 import android.app.Application
 import androidx.compose.runtime.getValue

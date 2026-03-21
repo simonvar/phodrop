@@ -1,4 +1,4 @@
-package dev.simonvar.gallery.ui.trash
+package dev.simonvar.gallery.presentation.trash
 
 import android.app.Activity
 import android.app.Application

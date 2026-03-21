@@ -1,4 +1,4 @@
-package dev.simonvar.gallery.ui.swipe
+package dev.simonvar.gallery.presentation.home
 
 import android.app.Application
 import androidx.compose.runtime.snapshotFlow

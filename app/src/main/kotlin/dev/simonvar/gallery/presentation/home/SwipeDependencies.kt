@@ -1,4 +1,4 @@
-package dev.simonvar.gallery.ui.swipe
+package dev.simonvar.gallery.presentation.home
 
 import dev.simonvar.gallery.arch.ActionDependencies
 import dev.simonvar.gallery.data.MediaRepository
