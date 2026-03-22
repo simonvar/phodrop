@@ -23,6 +23,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -94,19 +95,21 @@ fun HomeNode(
                         modifier = Modifier.fillMaxSize(),
                     ) {
                         state.currentItem?.let { item ->
-                            SwipeCard(
-                                item = item,
-                                onSwipeLeft = viewModel::onSwipeLeft,
-                                onSwipeRight = viewModel::onSwipeRight,
-                                isMuted = state.isMuted,
-                                onToggleMute = viewModel::toggleMute,
-                                programmaticSwipe = programmaticSwipe,
-                                onProgrammaticSwipeConsumed = { programmaticSwipe = null },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .weight(1f)
-                                    .padding(16.dp),
-                            )
+                            key(item.id) {
+                                SwipeCard(
+                                    item = item,
+                                    onSwipeLeft = viewModel::onSwipeLeft,
+                                    onSwipeRight = viewModel::onSwipeRight,
+                                    isMuted = state.isMuted,
+                                    onToggleMute = viewModel::toggleMute,
+                                    programmaticSwipe = programmaticSwipe,
+                                    onProgrammaticSwipeConsumed = { programmaticSwipe = null },
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .weight(1f)
+                                        .padding(16.dp),
+                                )
+                            }
                         }
 
                         Row(

@@ -27,6 +27,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -198,6 +199,7 @@ fun SwipeCard(
     }
 }
 
+@Immutable
 private data class MediaInfoBarState(
     val formattedDate: String,
     val formattedSize: String,
