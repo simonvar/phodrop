@@ -31,8 +31,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import dev.simonvar.gallery.R
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 
@@ -51,7 +53,7 @@ fun HomeNode(
         modifier = modifier,
         topBar = {
             TopAppBar(
-                title = { Text("Gallery Cleanup") },
+                title = { Text(stringResource(R.string.gallery_cleanup_title)) },
                 actions = {
                     IconButton(onClick = onNavigateToTrash) {
                         BadgedBox(
@@ -63,7 +65,7 @@ fun HomeNode(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Delete,
-                                contentDescription = "Trash",
+                                contentDescription = stringResource(R.string.trash),
                             )
                         }
                     }
@@ -84,7 +86,7 @@ fun HomeNode(
 
                 state.isEmpty -> {
                     Text(
-                        text = "No more media to review!",
+                        text = stringResource(R.string.no_more_media),
                         style = MaterialTheme.typography.headlineSmall,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.padding(32.dp),
@@ -125,7 +127,7 @@ fun HomeNode(
                         ) {
                             TextButton(onClick = { programmaticSwipe = SwipeDirection.LEFT }) {
                                 Text(
-                                    text = "\u2190 Delete",
+                                    text = stringResource(R.string.action_delete),
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.error,
                                 )
@@ -136,12 +138,12 @@ fun HomeNode(
                             ) {
                                 Icon(
                                     imageVector = Icons.AutoMirrored.Filled.Undo,
-                                    contentDescription = "Undo",
+                                    contentDescription = stringResource(R.string.action_undo),
                                 )
                             }
                             TextButton(onClick = { programmaticSwipe = SwipeDirection.RIGHT }) {
                                 Text(
-                                    text = "Keep \u2192",
+                                    text = stringResource(R.string.action_keep),
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.primary,
                                 )

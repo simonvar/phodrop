@@ -25,8 +25,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import dev.simonvar.gallery.R
 
 private fun requiredPermissions(): Array<String> {
     return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -94,13 +96,13 @@ private fun PermissionRationale(
         verticalArrangement = Arrangement.Center,
     ) {
         Text(
-            text = "Media Access Required",
+            text = stringResource(R.string.media_access_required),
             style = MaterialTheme.typography.headlineSmall,
             textAlign = TextAlign.Center,
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(
-            text = "This app needs access to your photos and videos to help you clean up your gallery.",
+            text = stringResource(R.string.media_access_rationale),
             style = MaterialTheme.typography.bodyLarge,
             textAlign = TextAlign.Center,
         )
@@ -112,11 +114,11 @@ private fun PermissionRationale(
                 }
                 context.startActivity(intent)
             }) {
-                Text("Open Settings")
+                Text(stringResource(R.string.open_settings))
             }
         } else {
             Button(onClick = onRequestPermission) {
-                Text("Grant Permission")
+                Text(stringResource(R.string.grant_permission))
             }
         }
     }

@@ -44,8 +44,11 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import dev.simonvar.gallery.R
 import me.saket.telephoto.zoomable.coil3.ZoomableAsyncImage
 import dev.simonvar.gallery.data.MediaItem
 import dev.simonvar.gallery.data.MediaType
@@ -169,7 +172,7 @@ fun SwipeCard(
             if (progress > 0.05f) {
                 Icon(
                     imageVector = Icons.Default.Check,
-                    contentDescription = "Keep",
+                    contentDescription = stringResource(R.string.keep),
                     tint = Color.Green.copy(alpha = (absProgress * 2f).coerceAtMost(1f)),
                     modifier = Modifier
                         .align(Alignment.TopStart)
@@ -180,7 +183,7 @@ fun SwipeCard(
             if (progress < -0.05f) {
                 Icon(
                     imageVector = Icons.Default.Close,
-                    contentDescription = "Delete",
+                    contentDescription = stringResource(R.string.delete),
                     tint = Color.Red.copy(alpha = (absProgress * 2f).coerceAtMost(1f)),
                     modifier = Modifier
                         .align(Alignment.TopEnd)
@@ -209,11 +212,12 @@ private data class MediaInfoBarState(
 
 @Composable
 private fun rememberMediaInfoBarState(item: MediaItem): MediaInfoBarState {
+    val context = LocalContext.current
     return remember(item) {
         val dateFormat = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
         val formattedDate = dateFormat.format(Date(item.dateAdded * 1000))
         val sizeMb = item.size / 1_048_576.0
-        val formattedSize = String.format(Locale.US, "%.1f MB", sizeMb)
+        val formattedSize = context.getString(R.string.size_mb, sizeMb)
         MediaInfoBarState(formattedDate, formattedSize, sizeMb, item.mediaType)
     }
 }
@@ -243,7 +247,7 @@ private fun MediaInfoBar(
                 Icon(
                     imageVector = if (isMuted) Icons.AutoMirrored.Filled.VolumeOff
                         else Icons.AutoMirrored.Filled.VolumeUp,
-                    contentDescription = if (isMuted) "Unmute" else "Mute",
+                    contentDescription = stringResource(if (isMuted) R.string.unmute else R.string.mute),
                     tint = MaterialTheme.colorScheme.onSurface,
                 )
             }

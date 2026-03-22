@@ -31,12 +31,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import dev.simonvar.gallery.R
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
 import dev.simonvar.gallery.data.MediaItem
 import dev.simonvar.gallery.data.MediaType
-import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -64,12 +65,13 @@ fun TrashNode(
                     val totalBytes = viewModel.items.sumOf { it.size }
                     val totalMb = totalBytes / 1_048_576.0
                     val sizeText = if (totalMb >= 1024) {
-                        String.format(Locale.US, "%.1f GB", totalMb / 1024)
+                        stringResource(R.string.size_gb, totalMb / 1024)
                     } else {
-                        String.format(Locale.US, "%.1f MB", totalMb)
+                        stringResource(R.string.size_mb, totalMb)
                     }
                     Text(buildAnnotatedString {
-                        append("Trash ($count) — ")
+                        append(stringResource(R.string.trash_title_count, count))
+                        append(" — ")
                         withStyle(SpanStyle(color = if (totalMb > 50) Color.Red else Color.Unspecified)) {
                             append(sizeText)
                         }
@@ -79,7 +81,7 @@ fun TrashNode(
                     IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
+                            contentDescription = stringResource(R.string.back),
                         )
                     }
                 },
@@ -95,7 +97,7 @@ fun TrashNode(
                         }) {
                             Icon(
                                 imageVector = Icons.Default.DeleteForever,
-                                contentDescription = "Delete All",
+                                contentDescription = stringResource(R.string.delete_all),
                             )
                         }
                     }
@@ -111,7 +113,7 @@ fun TrashNode(
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
-                    text = "Trash is empty",
+                    text = stringResource(R.string.trash_empty),
                     style = MaterialTheme.typography.bodyLarge,
                 )
             }
@@ -156,7 +158,7 @@ private fun TrashCell(
         if (item.mediaType == MediaType.VIDEO) {
             Icon(
                 imageVector = Icons.Default.PlayCircleOutline,
-                contentDescription = "Video",
+                contentDescription = stringResource(R.string.video),
                 tint = Color.White,
                 modifier = Modifier.align(Alignment.Center),
             )
@@ -168,7 +170,7 @@ private fun TrashCell(
         ) {
             Icon(
                 imageVector = Icons.Default.RestoreFromTrash,
-                contentDescription = "Restore",
+                contentDescription = stringResource(R.string.restore),
                 tint = Color.White,
             )
         }
