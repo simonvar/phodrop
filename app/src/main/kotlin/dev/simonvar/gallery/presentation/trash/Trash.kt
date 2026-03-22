@@ -1,4 +1,4 @@
-package dev.simonvar.gallery.presentation.trash.api
+package dev.simonvar.gallery.presentation.trash
 
 import androidx.navigation3.runtime.NavKey
 import kotlinx.serialization.Serializable

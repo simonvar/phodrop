@@ -13,9 +13,9 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import dev.simonvar.gallery.presentation.home.HomeNode
-import dev.simonvar.gallery.presentation.home.api.Home
+import dev.simonvar.gallery.presentation.home.Home
 import dev.simonvar.gallery.presentation.trash.TrashNode
-import dev.simonvar.gallery.presentation.trash.api.Trash
+import dev.simonvar.gallery.presentation.trash.Trash
 
 @Composable
 fun MainNode() {
@@ -25,15 +25,9 @@ fun MainNode() {
         backStack = navBackStack,
         onBack = { navBackStack.removeLastOrNull() },
         entryDecorators = listOf(rememberSaveableStateHolderNavEntryDecorator()),
-        transitionSpec = {
-            slideInHorizontally { it } togetherWith ExitTransition.KeepUntilTransitionsFinished
-        },
-        popTransitionSpec = {
-            EnterTransition.None togetherWith slideOutHorizontally { it }
-        },
-        predictivePopTransitionSpec = {
-            EnterTransition.None togetherWith slideOutHorizontally { it }
-        },
+        transitionSpec = { slideInHorizontally { it } togetherWith ExitTransition.KeepUntilTransitionsFinished },
+        popTransitionSpec = { EnterTransition.None togetherWith slideOutHorizontally { it } },
+        predictivePopTransitionSpec = { EnterTransition.None togetherWith slideOutHorizontally { it } },
         entryProvider = entryProvider {
             entry<Home> {
                 HomeNode(
