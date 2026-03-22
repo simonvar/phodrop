@@ -23,8 +23,15 @@ class SwipeLeftAction : UiAction<SwipeDependencies, SwipeState, SwipeEvent> {
         dependencies: SwipeDependencies,
         scope: ActionScope<SwipeState, SwipeEvent>,
     ) {
-        scope.currentState.currentItem?.let { dependencies.trashManager.add(it) }
-        scope.setState { copy(currentIndex = currentIndex + 1) }
+        scope.currentState.currentItem?.let { item ->
+            dependencies.trashManager.add(item)
+            scope.setState {
+                copy(
+                    currentIndex = currentIndex + 1,
+                    history = history + HistoryEntry(ActionType.TRASH, item),
+                )
+            }
+        }
     }
 }
 
@@ -33,7 +40,33 @@ class SwipeRightAction : UiAction<SwipeDependencies, SwipeState, SwipeEvent> {
         dependencies: SwipeDependencies,
         scope: ActionScope<SwipeState, SwipeEvent>,
     ) {
-        scope.setState { copy(currentIndex = currentIndex + 1) }
+        scope.currentState.currentItem?.let { item ->
+            scope.setState {
+                copy(
+                    currentIndex = currentIndex + 1,
+                    history = history + HistoryEntry(ActionType.SKIP, item),
+                )
+            }
+        }
+    }
+}
+
+class UndoAction : UiAction<SwipeDependencies, SwipeState, SwipeEvent> {
+    override suspend fun execute(
+        dependencies: SwipeDependencies,
+        scope: ActionScope<SwipeState, SwipeEvent>,
+    ) {
+        val current = scope.currentState
+        val lastEntry = current.history.lastOrNull() ?: return
+        if (lastEntry.type == ActionType.TRASH) {
+            dependencies.trashManager.remove(lastEntry.item)
+        }
+        scope.setState {
+            copy(
+                currentIndex = currentIndex - 1,
+                history = history.dropLast(1),
+            )
+        }
     }
 }
 

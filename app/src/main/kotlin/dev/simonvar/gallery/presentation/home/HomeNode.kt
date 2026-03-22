@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Undo
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
@@ -34,6 +35,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeNode(
@@ -79,6 +81,7 @@ fun HomeNode(
                 state.isLoading -> {
                     CircularProgressIndicator()
                 }
+
                 state.isEmpty -> {
                     Text(
                         text = "No more media to review!",
@@ -87,6 +90,7 @@ fun HomeNode(
                         modifier = Modifier.padding(32.dp),
                     )
                 }
+
                 else -> {
                     var programmaticSwipe by remember { mutableStateOf<SwipeDirection?>(null) }
 
@@ -117,12 +121,22 @@ fun HomeNode(
                                 .fillMaxWidth()
                                 .padding(bottom = 16.dp),
                             horizontalArrangement = Arrangement.SpaceEvenly,
+                            verticalAlignment = Alignment.CenterVertically,
                         ) {
                             TextButton(onClick = { programmaticSwipe = SwipeDirection.LEFT }) {
                                 Text(
                                     text = "\u2190 Delete",
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.error,
+                                )
+                            }
+                            IconButton(
+                                onClick = viewModel::onUndo,
+                                enabled = state.canUndo,
+                            ) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.Undo,
+                                    contentDescription = "Undo",
                                 )
                             }
                             TextButton(onClick = { programmaticSwipe = SwipeDirection.RIGHT }) {

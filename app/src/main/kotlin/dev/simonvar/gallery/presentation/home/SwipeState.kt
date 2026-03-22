@@ -9,6 +9,7 @@ data class SwipeState(
     val isLoading: Boolean = true,
     val isMuted: Boolean = true,
     val trashCount: Int = 0,
+    val history: List<HistoryEntry> = emptyList(),
 ) : ViewState {
 
     val currentItem: MediaItem?
@@ -16,4 +17,7 @@ data class SwipeState(
 
     val isEmpty: Boolean
         get() = !isLoading && currentIndex >= items.size
+
+    val canUndo: Boolean
+        get() = history.isNotEmpty()
 }

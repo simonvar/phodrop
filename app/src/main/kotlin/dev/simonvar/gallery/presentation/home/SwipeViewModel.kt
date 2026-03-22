@@ -35,6 +35,8 @@ class SwipeViewModel(application: Application) : SailViewModel<SwipeState, Swipe
 
     fun onSwipeRight() = dispatch(SwipeRightAction(), Dispatchers.Main)
 
+    fun onUndo() = dispatch(UndoAction(), Dispatchers.Main)
+
     fun toggleMute() = dispatch(ToggleMuteAction(), Dispatchers.Main)
 
     companion object {
