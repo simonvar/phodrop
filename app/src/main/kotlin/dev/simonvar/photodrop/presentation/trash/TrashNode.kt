@@ -27,6 +27,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -37,14 +38,15 @@ import dev.simonvar.photodrop.R
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
 import dev.simonvar.photodrop.data.MediaItem
+import dev.simonvar.photodrop.data.MediaRepositoryImpl
 import dev.simonvar.photodrop.data.MediaType
+import dev.simonvar.photodrop.data.TrashManager
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TrashNode(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: TrashViewModel = viewModel(),
 ) {
     val activity = LocalActivity.current!!
 
@@ -52,17 +54,20 @@ fun TrashNode(
         ActivityResultContracts.StartIntentSenderForResult()
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
-            viewModel.onDeleteConfirmed()
+            TrashManager.clear()
         }
     }
+
+    val repository = remember { MediaRepositoryImpl(activity) }
 
     Scaffold(
         modifier = modifier,
         topBar = {
             TopAppBar(
                 title = {
-                    val count = viewModel.items.size
-                    val totalBytes = viewModel.items.sumOf { it.size }
+                    val items = TrashManager.items
+                    val count = items.size
+                    val totalBytes = items.sumOf { it.size }
                     val totalMb = totalBytes / 1_048_576.0
                     val sizeText = if (totalMb >= 1024) {
                         stringResource(R.string.size_gb, totalMb / 1024)
@@ -86,13 +91,14 @@ fun TrashNode(
                     }
                 },
                 actions = {
-                    if (viewModel.items.isNotEmpty()) {
+                    if (TrashManager.items.isNotEmpty()) {
                         IconButton(onClick = {
-                            val request = viewModel.createDeleteAllRequest(activity)
+                            val uris = TrashManager.items.map { it.uri }
+                            val request =  repository.createDeleteRequest(activity, uris)
                             if (request != null) {
                                 deleteLauncher.launch(request)
                             } else {
-                                viewModel.onDeleteConfirmed()
+                                TrashManager.clear()
                             }
                         }) {
                             Icon(
@@ -105,7 +111,7 @@ fun TrashNode(
             )
         },
     ) { padding ->
-        if (viewModel.items.isEmpty()) {
+        if (TrashManager.items.isEmpty()) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -125,12 +131,12 @@ fun TrashNode(
                     .padding(padding),
             ) {
                 items(
-                    items = viewModel.items.toList(),
+                    items = TrashManager.items.toList(),
                     key = { it.id },
                 ) { item ->
                     TrashCell(
                         item = item,
-                        onRestore = { viewModel.restoreItem(item) },
+                        onRestore = { TrashManager.remove(item) },
                     )
                 }
             }
@@ -176,3 +182,4 @@ private fun TrashCell(
         }
     }
 }
+

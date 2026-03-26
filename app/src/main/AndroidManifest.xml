@@ -9,7 +9,7 @@
         android:maxSdkVersion="32" />
 
     <application
-        android:name=".GalleryApplication"
+        android:name=".PhotodropApplication"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:enableOnBackInvokedCallback="true"
@@ -20,7 +20,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Gallery">
         <activity
-            android:name=".MainActivity"
+            android:name=".PhotodropActivity"
             android:exported="true"
             android:theme="@style/Theme.Gallery">
             <intent-filter>

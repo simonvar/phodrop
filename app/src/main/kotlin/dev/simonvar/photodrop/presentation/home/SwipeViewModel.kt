@@ -7,14 +7,14 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import dev.simonvar.photodrop.arch.SailViewModel
-import dev.simonvar.photodrop.data.MediaRepository
+import dev.simonvar.photodrop.data.MediaRepositoryImpl
 import dev.simonvar.photodrop.data.TrashManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class SwipeViewModel(application: Application) : SailViewModel<SwipeState, SwipeEvent>(SwipeState()) {
 
-    private val repository = MediaRepository(application)
+    private val repository = MediaRepositoryImpl(application)
 
     override val dependencies = SwipeDependencies(
         coroutineScope = viewModelScope,

@@ -6,7 +6,7 @@ import coil3.ImageLoader
 import coil3.SingletonImageLoader
 import coil3.video.VideoFrameDecoder
 
-class GalleryApplication : Application(), SingletonImageLoader.Factory {
+class PhotodropApplication : Application(), SingletonImageLoader.Factory {
 
     override fun onCreate() {
         super.onCreate()

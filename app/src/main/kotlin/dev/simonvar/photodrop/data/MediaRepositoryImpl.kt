@@ -9,7 +9,7 @@ import android.os.Build
 import android.provider.MediaStore
 import androidx.activity.result.IntentSenderRequest
 
-class MediaRepository(private val context: Context) {
+class MediaRepositoryImpl(private val context: Context) {
 
     fun loadAllMedia(): List<MediaItem> {
         val items = mutableListOf<MediaItem>()

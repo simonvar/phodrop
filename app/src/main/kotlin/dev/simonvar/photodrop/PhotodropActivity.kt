@@ -11,7 +11,7 @@ import dev.simonvar.photodrop.ui.block.PermissionGate
 import dev.simonvar.photodrop.presentation.main.MainNode
 import dev.simonvar.photodrop.ui.theme.GalleryTheme
 
-class MainActivity : ComponentActivity() {
+class PhotodropActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
