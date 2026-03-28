@@ -11,11 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.DeleteForever
-import androidx.compose.material.icons.filled.PlayCircleOutline
-import androidx.compose.material.icons.filled.RestoreFromTrash
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -32,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import dev.simonvar.photodrop.R
@@ -85,7 +81,7 @@ fun TrashNode(
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            painter = painterResource(R.drawable.ic_arrow_back_24),
                             contentDescription = stringResource(R.string.back),
                         )
                     }
@@ -102,7 +98,7 @@ fun TrashNode(
                             }
                         }) {
                             Icon(
-                                imageVector = Icons.Default.DeleteForever,
+                                painter = painterResource(R.drawable.ic_delete_forever_24),
                                 contentDescription = stringResource(R.string.delete_all),
                             )
                         }
@@ -163,7 +159,7 @@ private fun TrashCell(
 
         if (item.mediaType == MediaType.VIDEO) {
             Icon(
-                imageVector = Icons.Default.PlayCircleOutline,
+                painter = painterResource(R.drawable.ic_video_file_24),
                 contentDescription = stringResource(R.string.video),
                 tint = Color.White,
                 modifier = Modifier.align(Alignment.Center),
@@ -175,7 +171,7 @@ private fun TrashCell(
             modifier = Modifier.align(Alignment.BottomEnd),
         ) {
             Icon(
-                imageVector = Icons.Default.RestoreFromTrash,
+                painter = painterResource(R.drawable.ic_restore_from_trash_24),
                 contentDescription = stringResource(R.string.restore),
                 tint = Color.White,
             )

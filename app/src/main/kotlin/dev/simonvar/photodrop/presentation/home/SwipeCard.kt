@@ -17,11 +17,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.automirrored.filled.VolumeOff
-import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -45,6 +40,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalResources
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -54,13 +50,13 @@ import dev.simonvar.photodrop.data.MediaItem
 import dev.simonvar.photodrop.data.MediaType
 import dev.simonvar.photodrop.ui.block.VideoPlayer
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format.char
 import kotlinx.datetime.toLocalDateTime
 import kotlin.math.abs
 import kotlin.math.roundToInt
+import kotlin.time.Instant
 
 private const val SWIPE_THRESHOLD_FRACTION = 0.4f
 private const val MAX_ROTATION_DEGREES = 15f
@@ -173,7 +169,7 @@ fun SwipeCard(
             val absProgress = abs(progress)
             if (progress > 0.05f) {
                 Icon(
-                    imageVector = Icons.Default.Check,
+                    painter = painterResource(R.drawable.ic_expand_circle_right_24),
                     contentDescription = stringResource(R.string.keep),
                     tint = Color.Green.copy(alpha = (absProgress * 2f).coerceAtMost(1f)),
                     modifier = Modifier
@@ -184,7 +180,7 @@ fun SwipeCard(
             }
             if (progress < -0.05f) {
                 Icon(
-                    imageVector = Icons.Default.Close,
+                    painter = painterResource(R.drawable.ic_delete_24),
                     contentDescription = stringResource(R.string.delete),
                     tint = Color.Red.copy(alpha = (absProgress * 2f).coerceAtMost(1f)),
                     modifier = Modifier
@@ -257,8 +253,9 @@ private fun MediaInfoBar(
         if (state.mediaType == MediaType.VIDEO) {
             IconButton(onClick = onToggleMute) {
                 Icon(
-                    imageVector = if (isMuted) Icons.AutoMirrored.Filled.VolumeOff
-                        else Icons.AutoMirrored.Filled.VolumeUp,
+                    painter =
+                        if (isMuted) painterResource(R.drawable.ic_volume_off_24)
+                        else painterResource(R.drawable.ic_volume_up_24),
                     contentDescription = stringResource(if (isMuted) R.string.unmute else R.string.mute),
                     tint = MaterialTheme.colorScheme.onSurface,
                 )
@@ -268,7 +265,7 @@ private fun MediaInfoBar(
             text = state.formattedSize,
             style = MaterialTheme.typography.bodySmall,
             color = if (state.sizeMb > 50) MaterialTheme.colorScheme.error
-                else MaterialTheme.colorScheme.onSurface,
+            else MaterialTheme.colorScheme.onSurface,
         )
     }
 }

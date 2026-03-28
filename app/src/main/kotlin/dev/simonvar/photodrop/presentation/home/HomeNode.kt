@@ -7,9 +7,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Undo
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.CircularProgressIndicator
@@ -29,6 +26,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -66,7 +64,7 @@ fun HomeNode(
                             }
                         ) {
                             Icon(
-                                imageVector = Icons.Default.Delete,
+                                painter = painterResource(R.drawable.ic_delete_24),
                                 contentDescription = stringResource(R.string.trash),
                             )
                         }
@@ -139,7 +137,7 @@ fun HomeNode(
                                 enabled = state.canUndo,
                             ) {
                                 Icon(
-                                    imageVector = Icons.AutoMirrored.Filled.Undo,
+                                    painter = painterResource(R.drawable.ic_undo_24),
                                     contentDescription = stringResource(R.string.action_undo),
                                 )
                             }
