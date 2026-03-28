@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
@@ -24,6 +23,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
@@ -32,7 +32,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -42,7 +41,6 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import dev.simonvar.photodrop.R
 import me.saket.telephoto.zoomable.coil3.ZoomableAsyncImage
@@ -55,7 +53,6 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format.char
 import kotlinx.datetime.toLocalDateTime
 import kotlin.math.abs
-import kotlin.math.roundToInt
 import kotlin.time.Instant
 
 private const val SWIPE_THRESHOLD_FRACTION = 0.4f
@@ -71,13 +68,20 @@ fun SwipeCard(
     onToggleMute: () -> Unit,
     item: MediaItem,
     isMuted: Boolean,
+    isFront: Boolean,
     modifier: Modifier = Modifier,
+    backCardProgress: Float = 0f,
     programmaticSwipe: SwipeDirection? = null,
     onProgrammaticSwipeConsumed: () -> Unit = {},
+    onSwipeProgress: (Float) -> Unit = {},
 ) {
     val scope = rememberCoroutineScope()
     val offset = remember { Animatable(Offset.Zero, Offset.VectorConverter) }
     var cardWidth by remember { mutableFloatStateOf(1f) }
+
+    LaunchedEffect(isFront) {
+        if (isFront) offset.snapTo(Offset.Zero)
+    }
 
     LaunchedEffect(programmaticSwipe) {
         if (programmaticSwipe == null) return@LaunchedEffect
@@ -93,6 +97,9 @@ fun SwipeCard(
     }
 
     val progress = if (cardWidth > 0f) offset.value.x / cardWidth else 0f
+    if (isFront) {
+        SideEffect { onSwipeProgress(progress) }
+    }
     val rotation =
         (progress * MAX_ROTATION_DEGREES).coerceIn(-MAX_ROTATION_DEGREES, MAX_ROTATION_DEGREES)
 
@@ -101,56 +108,75 @@ fun SwipeCard(
     Column(
         modifier = modifier
             .onSizeChanged { cardWidth = it.width.toFloat() }
-            .offset { IntOffset(offset.value.x.roundToInt(), offset.value.y.roundToInt()) }
-            .rotate(rotation)
+            .graphicsLayer {
+                if (isFront) {
+                    translationX = offset.value.x
+                    translationY = offset.value.y
+                    rotationZ = rotation
+                } else {
+                    val factor = abs(backCardProgress).coerceIn(0f, 1f)
+                    scaleX = 0.9f + 0.1f * factor
+                    scaleY = 0.9f + 0.1f * factor
+                    alpha = 0.6f + 0.4f * factor
+                }
+            }
             .clip(RoundedCornerShape(16.dp))
             .border(1.dp, Color.Gray.copy(alpha = 0.3f), RoundedCornerShape(16.dp))
             .background(MaterialTheme.colorScheme.surfaceContainer)
-            .pointerInput(item.id) {
-                detectDragGestures(
-                    onDrag = { change, dragAmount ->
-                        change.consume()
-                        scope.launch {
-                            offset.snapTo(
-                                Offset(
-                                    offset.value.x + dragAmount.x,
-                                    offset.value.y + dragAmount.y,
-                                )
-                            )
-                        }
-                    },
-                    onDragEnd = {
-                        scope.launch {
-                            val swipedRight = offset.value.x > cardWidth * SWIPE_THRESHOLD_FRACTION
-                            val swipedLeft = offset.value.x < -cardWidth * SWIPE_THRESHOLD_FRACTION
+            .then(
+                if (isFront) {
+                    Modifier.pointerInput(item.id) {
+                        detectDragGestures(
+                            onDrag = { change, dragAmount ->
+                                change.consume()
+                                scope.launch {
+                                    offset.snapTo(
+                                        Offset(
+                                            offset.value.x + dragAmount.x,
+                                            offset.value.y + dragAmount.y,
+                                        )
+                                    )
+                                }
+                            },
+                            onDragEnd = {
+                                scope.launch {
+                                    val swipedRight =
+                                        offset.value.x > cardWidth * SWIPE_THRESHOLD_FRACTION
+                                    val swipedLeft =
+                                        offset.value.x < -cardWidth * SWIPE_THRESHOLD_FRACTION
 
-                            if (swipedRight || swipedLeft) {
-                                val targetX = if (swipedRight) cardWidth * 2f else -cardWidth * 2f
-                                offset.animateTo(
-                                    Offset(targetX, offset.value.y),
-                                    animationSpec = tween(FLY_OFF_DURATION_MS),
-                                )
-                                if (swipedLeft) onSwipeLeft() else onSwipeRight()
-                                offset.snapTo(Offset.Zero)
-                            } else {
-                                offset.animateTo(
-                                    Offset.Zero,
-                                    animationSpec = spring(),
-                                )
-                            }
-                        }
-                    },
-                    onDragCancel = {
-                        scope.launch {
-                            offset.animateTo(Offset.Zero, animationSpec = spring())
-                        }
-                    },
-                )
-            },
+                                    if (swipedRight || swipedLeft) {
+                                        val targetX =
+                                            if (swipedRight) cardWidth * 2f else -cardWidth * 2f
+                                        offset.animateTo(
+                                            Offset(targetX, offset.value.y),
+                                            animationSpec = tween(FLY_OFF_DURATION_MS),
+                                        )
+                                        if (swipedLeft) onSwipeLeft() else onSwipeRight()
+                                        offset.snapTo(Offset.Zero)
+                                    } else {
+                                        offset.animateTo(
+                                            Offset.Zero,
+                                            animationSpec = spring(),
+                                        )
+                                    }
+                                }
+                            },
+                            onDragCancel = {
+                                scope.launch {
+                                    offset.animateTo(Offset.Zero, animationSpec = spring())
+                                }
+                            },
+                        )
+                    }
+                } else {
+                    Modifier
+                },
+            ),
     ) {
         // Media content + swipe overlays
         Box(modifier = Modifier.weight(1f)) {
-            if (item.mediaType == MediaType.VIDEO) {
+            if (item.mediaType == MediaType.VIDEO && isFront) {
                 VideoPlayer(
                     uri = item.uri,
                     isMuted = isMuted,
@@ -165,29 +191,31 @@ fun SwipeCard(
                 )
             }
 
-            // Swipe overlays
-            val absProgress = abs(progress)
-            if (progress > 0.05f) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_expand_circle_right_24),
-                    contentDescription = stringResource(R.string.keep),
-                    tint = Color.Green.copy(alpha = (absProgress * 2f).coerceAtMost(1f)),
-                    modifier = Modifier
-                        .align(Alignment.TopStart)
-                        .padding(24.dp)
-                        .graphicsLayer { scaleX = 2f; scaleY = 2f },
-                )
-            }
-            if (progress < -0.05f) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_delete_24),
-                    contentDescription = stringResource(R.string.delete),
-                    tint = Color.Red.copy(alpha = (absProgress * 2f).coerceAtMost(1f)),
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(24.dp)
-                        .graphicsLayer { scaleX = 2f; scaleY = 2f },
-                )
+            // Swipe overlays (front only)
+            if (isFront) {
+                val absProgress = abs(progress)
+                if (progress > 0.05f) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_expand_circle_right_24),
+                        contentDescription = stringResource(R.string.keep),
+                        tint = Color.Green.copy(alpha = (absProgress * 2f).coerceAtMost(1f)),
+                        modifier = Modifier
+                            .align(Alignment.TopStart)
+                            .padding(24.dp)
+                            .graphicsLayer { scaleX = 2f; scaleY = 2f },
+                    )
+                }
+                if (progress < -0.05f) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_delete_24),
+                        contentDescription = stringResource(R.string.delete),
+                        tint = Color.Red.copy(alpha = (absProgress * 2f).coerceAtMost(1f)),
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(24.dp)
+                            .graphicsLayer { scaleX = 2f; scaleY = 2f },
+                    )
+                }
             }
         }
 

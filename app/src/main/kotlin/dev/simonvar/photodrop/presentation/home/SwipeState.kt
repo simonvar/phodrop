@@ -15,6 +15,9 @@ data class SwipeState(
     val currentItem: MediaItem?
         get() = items.getOrNull(currentIndex)
 
+    val nextItem: MediaItem?
+        get() = items.getOrNull(currentIndex + 1)
+
     val isEmpty: Boolean
         get() = !isLoading && currentIndex >= items.size
 

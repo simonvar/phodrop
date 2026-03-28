@@ -12,6 +12,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -20,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import dev.simonvar.photodrop.R
 import dev.simonvar.photodrop.di.LocalDepScope
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -69,26 +71,61 @@ fun HomeNode(
 
                 else -> {
                     var programmaticSwipe by remember { mutableStateOf<SwipeDirection?>(null) }
+                    var swipeProgress by remember { mutableFloatStateOf(0f) }
+                    val isSlotAFront = state.currentIndex % 2 == 0
+
+                    val slotAItem = if (isSlotAFront) state.currentItem else state.nextItem
+                    val slotBItem = if (isSlotAFront) state.nextItem else state.currentItem
 
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier.fillMaxSize(),
                     ) {
-                        state.currentItem?.let { item ->
-                            key(item.id) {
-                                SwipeCard(
-                                    item = item,
-                                    onSwipeLeft = viewModel::onSwipeLeft,
-                                    onSwipeRight = viewModel::onSwipeRight,
-                                    isMuted = state.isMuted,
-                                    onToggleMute = viewModel::toggleMute,
-                                    programmaticSwipe = programmaticSwipe,
-                                    onProgrammaticSwipeConsumed = { programmaticSwipe = null },
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .weight(1f)
-                                        .padding(16.dp),
-                                )
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(1f)
+                                .padding(16.dp),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            slotAItem?.let { item ->
+                                key("slotA") {
+                                    SwipeCard(
+                                        item = item,
+                                        isFront = isSlotAFront,
+                                        backCardProgress = if (!isSlotAFront) swipeProgress else 0f,
+                                        onSwipeLeft = viewModel::onSwipeLeft,
+                                        onSwipeRight = viewModel::onSwipeRight,
+                                        onSwipeProgress = { swipeProgress = it },
+                                        isMuted = state.isMuted,
+                                        onToggleMute = viewModel::toggleMute,
+                                        programmaticSwipe = if (isSlotAFront) programmaticSwipe else null,
+                                        onProgrammaticSwipeConsumed = { programmaticSwipe = null },
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .zIndex(if (isSlotAFront) 1f else 0f),
+                                    )
+                                }
+                            }
+
+                            slotBItem?.let { item ->
+                                key("slotB") {
+                                    SwipeCard(
+                                        item = item,
+                                        isFront = !isSlotAFront,
+                                        backCardProgress = if (isSlotAFront) swipeProgress else 0f,
+                                        onSwipeLeft = viewModel::onSwipeLeft,
+                                        onSwipeRight = viewModel::onSwipeRight,
+                                        onSwipeProgress = { swipeProgress = it },
+                                        isMuted = state.isMuted,
+                                        onToggleMute = viewModel::toggleMute,
+                                        programmaticSwipe = if (!isSlotAFront) programmaticSwipe else null,
+                                        onProgrammaticSwipeConsumed = { programmaticSwipe = null },
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .zIndex(if (!isSlotAFront) 1f else 0f),
+                                    )
+                                }
                             }
                         }
 
