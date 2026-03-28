@@ -3,9 +3,9 @@
     <string name="gallery_cleanup_title">Gallery Cleanup</string>
     <string name="trash">Trash</string>
     <string name="no_more_media">No more media to review!</string>
-    <string name="action_delete">← Delete</string>
+    <string name="action_delete">Delete</string>
     <string name="action_undo">Undo</string>
-    <string name="action_keep">Keep →</string>
+    <string name="action_keep">Keep</string>
     <string name="keep">Keep</string>
     <string name="delete">Delete</string>
     <string name="unmute">Unmute</string>
