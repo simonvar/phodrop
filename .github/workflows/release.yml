@@ -1,0 +1,162 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g. "1.1")'
+        required: true
+        type: string
+      next_version:
+        description: 'Next development version (e.g. "1.2"). Defaults to patch-incremented version.'
+        required: false
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Validate inputs and compute next version
+        id: versions
+        run: |
+          VERSION="${{ inputs.version }}"
+          NEXT="${{ inputs.next_version }}"
+
+          if [[ ! "$VERSION" =~ ^[0-9]+(\.[0-9]+)*$ ]]; then
+            echo "::error::Invalid version format: '$VERSION'. Expected format like '1.0' or '1.2.3'."
+            exit 1
+          fi
+
+          if [ -n "$NEXT" ] && [[ ! "$NEXT" =~ ^[0-9]+(\.[0-9]+)*$ ]]; then
+            echo "::error::Invalid next_version format: '$NEXT'."
+            exit 1
+          fi
+
+          if [ -z "$NEXT" ]; then
+            NEXT=$(echo "$VERSION" | awk -F. '{$NF=$NF+1; print}' OFS=.)
+          fi
+
+          echo "release_version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "next_version=$NEXT" >> "$GITHUB_OUTPUT"
+          echo "## Release Parameters" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Release version:** $VERSION (tag: v$VERSION)" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Next dev version:** $NEXT" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Verify tag does not exist
+        env:
+          VERSION: ${{ steps.versions.outputs.release_version }}
+        run: |
+          if git ls-remote --tags origin "refs/tags/v${VERSION}" | grep -q .; then
+            echo "::error::Tag v${VERSION} already exists on remote."
+            exit 1
+          fi
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'jetbrains'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Stamp release version
+        id: stamp
+        env:
+          VERSION: ${{ steps.versions.outputs.release_version }}
+        run: |
+          BUILD_GRADLE="app/build.gradle.kts"
+
+          CURRENT_CODE=$(grep -oP 'versionCode\s*=\s*\K[0-9]+' "$BUILD_GRADLE")
+          echo "current_version_code=$CURRENT_CODE" >> "$GITHUB_OUTPUT"
+
+          sed -i "s/versionName = \".*\"/versionName = \"$VERSION\"/" "$BUILD_GRADLE"
+
+          echo "Stamped versionName = \"$VERSION\" (versionCode = $CURRENT_CODE)"
+          grep -E 'version(Code|Name)' "$BUILD_GRADLE"
+
+      - name: Decode release keystore
+        run: echo "${{ secrets.RELEASE_KEYSTORE_BASE64 }}" | base64 --decode > "${{ github.workspace }}/release-keystore.jks"
+
+      - name: Build release APK
+        env:
+          KEYSTORE_FILE: ${{ github.workspace }}/release-keystore.jks
+          KEYSTORE_PASSWORD: ${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
+        run: ./gradlew assembleRelease
+
+      - name: Rename APK
+        env:
+          VERSION: ${{ steps.versions.outputs.release_version }}
+        run: |
+          mv app/build/outputs/apk/release/app-release.apk \
+             app/build/outputs/apk/release/photodrop-${VERSION}.apk
+
+      - name: Restore build.gradle.kts
+        run: git checkout -- app/build.gradle.kts
+
+      - name: Create and push tag
+        env:
+          VERSION: ${{ steps.versions.outputs.release_version }}
+        run: |
+          git tag "v${VERSION}"
+          git push origin "v${VERSION}"
+
+      - name: Create GitHub Release
+        env:
+          VERSION: ${{ steps.versions.outputs.release_version }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "v${VERSION}" \
+            "app/build/outputs/apk/release/photodrop-${VERSION}.apk" \
+            --title "Photodrop v${VERSION}" \
+            --generate-notes
+
+      - name: Create version bump PR
+        env:
+          VERSION: ${{ steps.versions.outputs.release_version }}
+          NEXT_VERSION: ${{ steps.versions.outputs.next_version }}
+          CURRENT_CODE: ${{ steps.stamp.outputs.current_version_code }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          NEXT_CODE=$((CURRENT_CODE + 1))
+          BRANCH="bump-version/${NEXT_VERSION}"
+
+          git checkout -b "$BRANCH"
+
+          sed -i "s/versionCode = ${CURRENT_CODE}/versionCode = ${NEXT_CODE}/" app/build.gradle.kts
+          sed -i "s/versionName = \".*\"/versionName = \"${NEXT_VERSION}\"/" app/build.gradle.kts
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add app/build.gradle.kts
+          git commit -m "Bump version to ${NEXT_VERSION} (versionCode ${NEXT_CODE})"
+          git push origin "$BRANCH"
+
+          gh pr create \
+            --title "Bump version to ${NEXT_VERSION}" \
+            --body "$(cat <<EOF
+          Automated version bump after release v${VERSION}.
+
+          - \`versionCode\`: ${CURRENT_CODE} → ${NEXT_CODE}
+          - \`versionName\`: \"${VERSION}\" → \"${NEXT_VERSION}\"
+
+          Created by the [release workflow](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}).
+          EOF
+          )" \
+            --base main \
+            --head "$BRANCH"
+
+      - name: Cleanup keystore
+        if: always()
+        run: rm -f "${{ github.workspace }}/release-keystore.jks"
