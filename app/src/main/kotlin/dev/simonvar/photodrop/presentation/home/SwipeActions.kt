@@ -26,10 +26,11 @@ class LoadMediaAction : UiAction<SwipeDependencies, SwipeState, SwipeEvent> {
             .map { (name, count) -> MediaBucket(name, count) }
             .sortedByDescending { it.count }
         val allBucketNames = buckets.map { it.name }.toPersistentSet()
+        val nonFavoriteItems = allItems.filter { !it.isFavorite }
         scope.setState {
             copy(
-                allItems = allItems,
-                items = allItems,
+                allItems = nonFavoriteItems,
+                items = nonFavoriteItems,
                 buckets = buckets,
                 enabledBuckets = allBucketNames,
                 currentIndex = 0,

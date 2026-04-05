@@ -41,6 +41,7 @@
     <string name="share">Поделиться</string>
     <string name="favorites">Избранное</string>
     <string name="favorites_empty">Пока нет избранного</string>
+    <string name="favorites_hint">Медиа из избранного не появляются в карточках</string>
     <string name="add_to_favorites">Добавить в избранное</string>
     <string name="remove_from_favorites">Удалить из избранного</string>
     <string name="bucket_all">Все</string>
